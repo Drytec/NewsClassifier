@@ -1,0 +1,12 @@
+{
+  "test_loss": 1.3587206602096558,
+  "accuracy": 0.6445831060409546,
+  "f1_macro": 0.6295924171714761,
+  "f1_weighted": 0.6424205161421137,
+  "precision_macro": 0.6481478264111459,
+  "recall_macro": 0.630269721412649,
+  "model_name": "baseline_mlp",
+  "vocab_size": 5000,
+  "training_time_sec": 13.937556743621826,
+  "curves_path": "results/learning_curves_baseline_mlp.png"
+}
