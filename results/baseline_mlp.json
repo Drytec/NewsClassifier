@@ -7,6 +7,12 @@
   "recall_macro": 0.630269721412649,
   "model_name": "baseline_mlp",
   "vocab_size": 5000,
+  "hidden_dim": 256,
+  "dropout": 0.4,
+  "l2_reg": 0.0001,
+  "lr": 0.001,
+  "epochs": 20,
+  "batch_size": 64,
   "training_time_sec": 13.937556743621826,
   "curves_path": "results/learning_curves_baseline_mlp.png"
 }

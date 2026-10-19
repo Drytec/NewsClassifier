@@ -51,10 +51,13 @@ def main() -> None:
         val = data
         for k in keys:
             if not isinstance(val, dict):
-                return "N/A"
+                val = None
+                break
             val = val.get(k)
-            if val is None:
-                return "N/A"
+        if val is None and isinstance(data, dict):
+            val = data.get(keys[-1])
+        if val is None:
+            return "N/A"
         if isinstance(val, float):
             return f"{val:{fmt}}"
         return str(val)
@@ -67,20 +70,20 @@ def main() -> None:
         "",
         f"| Métrica / Parámetro | {name_a} | {name_b} |",
         "| :--- | :---: | :---: |",
-        f"| **Tamaño Vocabulario TF-IDF** | {get_val(m_a, ['dataset_info', 'vocab_size'])} | {get_val(m_b, ['dataset_info', 'vocab_size'])} |",
-        f"| **Capas Ocultas** | {get_val(m_a, ['hyperparameters', 'num_layers'])} | {get_val(m_b, ['hyperparameters', 'num_layers'])} |",
-        f"| **Neuronas (Capa 1)** | {get_val(m_a, ['hyperparameters', 'hidden_dim'])} | {get_val(m_b, ['hyperparameters', 'hidden_dim'])} |",
-        f"| **Tasa Dropout** | {get_val(m_a, ['hyperparameters', 'dropout'])} | {get_val(m_b, ['hyperparameters', 'dropout'])} |",
-        f"| **Batch Normalization** | {get_val(m_a, ['hyperparameters', 'use_batch_norm'])} | {get_val(m_b, ['hyperparameters', 'use_batch_norm'])} |",
-        f"| **Learning Rate** | {get_val(m_a, ['hyperparameters', 'lr'])} | {get_val(m_b, ['hyperparameters', 'lr'])} |",
+        f"| **Tamaño Vocabulario TF-IDF** | {get_val(m_a, ['vocab_size'])} | {get_val(m_b, ['vocab_size'])} |",
+        f"| **Neuronas (Capa 1)** | {get_val(m_a, ['hidden_dim'])} | {get_val(m_b, ['hidden_dim'])} |",
+        f"| **Tasa Dropout** | {get_val(m_a, ['dropout'])} | {get_val(m_b, ['dropout'])} |",
+        f"| **Regularización L2** | {get_val(m_a, ['l2_reg'])} | {get_val(m_b, ['l2_reg'])} |",
+        f"| **Learning Rate** | {get_val(m_a, ['lr'])} | {get_val(m_b, ['lr'])} |",
+        f"| **Batch Size** | {get_val(m_a, ['batch_size'])} | {get_val(m_b, ['batch_size'])} |",
         "| --- | --- | --- |",
-        f"| **Exactitud (Test Accuracy)** | {get_val(m_a, ['test_metrics', 'accuracy'])} | {get_val(m_b, ['test_metrics', 'accuracy'])} |",
-        f"| **F1-Score (Macro)** | {get_val(m_a, ['test_metrics', 'f1_macro'])} | {get_val(m_b, ['test_metrics', 'f1_macro'])} |",
-        f"| **F1-Score (Weighted)** | {get_val(m_a, ['test_metrics', 'f1_weighted'])} | {get_val(m_b, ['test_metrics', 'f1_weighted'])} |",
-        f"| **Precisión (Macro)** | {get_val(m_a, ['test_metrics', 'precision_macro'])} | {get_val(m_b, ['test_metrics', 'precision_macro'])} |",
-        f"| **Sensibilidad (Macro Recall)** | {get_val(m_a, ['test_metrics', 'recall_macro'])} | {get_val(m_b, ['test_metrics', 'recall_macro'])} |",
+        f"| **Exactitud (Test Accuracy)** | {get_val(m_a, ['accuracy'])} | {get_val(m_b, ['accuracy'])} |",
+        f"| **F1-Score (Macro)** | {get_val(m_a, ['f1_macro'])} | {get_val(m_b, ['f1_macro'])} |",
+        f"| **F1-Score (Weighted)** | {get_val(m_a, ['f1_weighted'])} | {get_val(m_b, ['f1_weighted'])} |",
+        f"| **Precisión (Macro)** | {get_val(m_a, ['precision_macro'])} | {get_val(m_b, ['precision_macro'])} |",
+        f"| **Sensibilidad (Macro Recall)** | {get_val(m_a, ['recall_macro'])} | {get_val(m_b, ['recall_macro'])} |",
         f"| **Tiempo de Entrenamiento** | {get_val(m_a, ['training_time_sec'], '.2f')}s | {get_val(m_b, ['training_time_sec'], '.2f')}s |",
-        f"| **Épocas Ejecutadas** | {get_val(m_a, ['hyperparameters', 'epochs_trained'])} | {get_val(m_b, ['hyperparameters', 'epochs_trained'])} |",
+        f"| **Épocas Máximas** | {get_val(m_a, ['epochs'])} | {get_val(m_b, ['epochs'])} |",
     ]
 
     report_content = "\n".join(table_lines)
@@ -97,8 +100,15 @@ def main() -> None:
         metrics_names = ["Accuracy", "F1 (Macro)", "Precision (Macro)", "Recall (Macro)"]
         keys = ["accuracy", "f1_macro", "precision_macro", "recall_macro"]
 
-        vals_a = [float(m_a.get("test_metrics", {}).get(k, 0.0)) for k in keys]
-        vals_b = [float(m_b.get("test_metrics", {}).get(k, 0.0)) for k in keys]
+        def get_metric(data, k):
+            if not data:
+                return 0.0
+            if "test_metrics" in data and isinstance(data["test_metrics"], dict):
+                return float(data["test_metrics"].get(k, data.get(k, 0.0)))
+            return float(data.get(k, 0.0))
+
+        vals_a = [get_metric(m_a, k) for k in keys]
+        vals_b = [get_metric(m_b, k) for k in keys]
 
         x = np.arange(len(metrics_names))
         width = 0.35

@@ -310,6 +310,12 @@ def main() -> None:
     results.update({
         "model_name": args.output_name,
         "vocab_size": args.vocab_size,
+        "hidden_dim": args.hidden_dim,
+        "dropout": args.dropout,
+        "l2_reg": args.l2_reg,
+        "lr": args.lr,
+        "epochs": args.epochs,
+        "batch_size": args.batch_size,
         "training_time_sec": train_time,
         "curves_path": curves_path,
     })
